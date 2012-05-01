@@ -1070,6 +1070,29 @@ class TrialHandler(_BaseTrialHandler):
             if delim==',': f = codecs.open(fileName+'.csv', writeFormat, encoding="utf-8")
             else: f=codecs.open(fileName+'.txt',writeFormat, encoding = "utf-8")
 
+        
+        header = self.wideTable()
+        
+        if not matrixOnly:
+        # write the header row:
+            nextLine = ''
+            for parameterName in header:
+                nextLine = nextLine + parameterName + delim
+            f.write(nextLine[:-1] + '\n') # remove the final orphaned tab character
+
+        # write the data matrix:
+        for trial in dataOut:
+            nextLine = ''
+            for parameterName in header:
+                nextLine = nextLine + str(trial[parameterName]) + delim
+            nextLine = nextLine[:-1] # remove the final orphaned tab character
+            f.write(nextLine + '\n')
+
+        if f != sys.stdout:
+            f.close()
+            logging.info('saved wide-format data to %s' %f.name)
+            
+    def wideTable(self):
         # collect parameter names related to the stimuli:
         if self.trialList[0]:
             header = self.trialList[0].keys()
@@ -1125,24 +1148,7 @@ class TrialHandler(_BaseTrialHandler):
             for key in self.extraInfo:
                 header.insert(0, key)
 
-        if not matrixOnly:
-        # write the header row:
-            nextLine = ''
-            for parameterName in header:
-                nextLine = nextLine + parameterName + delim
-            f.write(nextLine[:-1] + '\n') # remove the final orphaned tab character
-
-        # write the data matrix:
-        for trial in dataOut:
-            nextLine = ''
-            for parameterName in header:
-                nextLine = nextLine + str(trial[parameterName]) + delim
-            nextLine = nextLine[:-1] # remove the final orphaned tab character
-            f.write(nextLine + '\n')
-
-        if f != sys.stdout:
-            f.close()
-            logging.info('saved wide-format data to %s' %f.name)
+        return dataOut
 
     def addData(self, thisType, value, position=None):
         """Add data for the current trial
