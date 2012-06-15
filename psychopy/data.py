@@ -846,9 +846,13 @@ class TrialHandler(_BaseTrialHandler):
         for stimN in range(len(self.trialList)):
             #first the params for this stim (from self.trialList)
             for heading in stimOut:
-                thisType = type(self.trialList[stimN][heading])
-                if thisType==float: f.write('%.4f%s' %(self.trialList[stimN][heading],delim))
-                else: f.write('%s%s' %(self.trialList[stimN][heading],delim))
+                if heading in self.trialList[stimN].keys():
+                    thisType = type(self.trialList[stimN][heading])
+                    if thisType==float: f.write('%.4f%s' %(self.trialList[stimN][heading],delim))
+                    else: f.write('%s%s' %(self.trialList[stimN][heading],delim))
+                elif heading in self.extraInfo.keys():
+                    f.write('%s%s' % (self.extraInfo[heading],delim))
+                else: print 'Invalid stim: %s' % heading
 
             #then the data for this stim (from self.data)
             for thisDataOut in dataOut:
