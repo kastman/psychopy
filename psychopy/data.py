@@ -778,7 +778,8 @@ class TrialHandler(_BaseTrialHandler):
                    stimOut=[],
                    dataOut=('n','all_mean','all_std', 'all_raw'),
                    delim='\t',
-                   matrixOnly=False,
+                   writeHeader=True,
+                   writeExtraInfo=True,
                    appendFile=True,
                   ):
         """
@@ -806,8 +807,11 @@ class TrialHandler(_BaseTrialHandler):
             delim:
                 allows the user to use a delimiter other than tab ("," is popular with file extension ".csv")
 
-            matrixOnly:
-                outputs the data with no header row or extraInfo attached
+            writeHeader:
+                outputs the data with a header row
+            
+            writeExtraInfo: 
+                outputs the data with extraInfo attached at the bottom.
 
             appendFile:
                 will add this output to the end of the specified file if it already exists
@@ -830,7 +834,7 @@ class TrialHandler(_BaseTrialHandler):
             if delim==',': f= codecs.open(fileName+'.csv',writeFormat, encoding = "utf-8")
             else: f=codecs.open(fileName+'.dlm',writeFormat, encoding = "utf-8")
 
-        if not matrixOnly:
+        if writeHeader:
             #write a header line
             for heading in stimOut+dataHead:
                 if heading=='ran_sum': heading ='n'
@@ -869,7 +873,7 @@ class TrialHandler(_BaseTrialHandler):
             f.write('\n')
 
         #add self.extraInfo
-        if (self.extraInfo != None) and not matrixOnly:
+        if (self.extraInfo != None) and writeExtraInfo:
             strInfo = str(self.extraInfo)
             #dict begins and ends with {} - remove
             strInfo = strInfo[1:-1] #string.replace(strInfo, '{','');strInfo = string.replace(strInfo, '}','');
