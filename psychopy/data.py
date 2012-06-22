@@ -785,6 +785,7 @@ class TrialHandler(_BaseTrialHandler):
                    delim='\t',
                    writeHeader=True,
                    writeExtraInfo=True,
+                   writeMatrix=True,
                    appendFile=True,
                   ):
         """
@@ -817,6 +818,9 @@ class TrialHandler(_BaseTrialHandler):
             
             writeExtraInfo: 
                 outputs the data with extraInfo attached at the bottom.
+                
+            writeMatrix:
+                Deprecated. Output both Header and ExtraInfo when True, neither if False.
 
             appendFile:
                 will add this output to the end of the specified file if it already exists
