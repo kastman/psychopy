@@ -716,6 +716,11 @@ class TrialHandler(_BaseTrialHandler):
                 continue#no need to do more with this one
             #then break into dataType and analysis
             dataType, analType =string.rsplit(thisDataOut, '_', 1)
+            
+            # Warn if an Invalid Data Type was given in dataOut
+            if dataType not in allDataTypes:
+                logging.warn("Data Type %s not found in %s" % (dataType, allDataTypes))
+            
             if dataType=='all':
                 dataOutNew.extend([key+"_"+analType for key in allDataTypes])
                 if 'order_mean' in dataOutNew: dataOutNew.remove('order_mean')
