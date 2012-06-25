@@ -896,8 +896,8 @@ class TrialHandler(_BaseTrialHandler):
             strInfo = string.replace(strInfo, '])', '')
 
             f.write('\n%s\n' %strInfo)
-
-        f.write("\n")
+            f.write("\n")
+            
         if f != sys.stdout:
             f.close()
             logging.info('saved data to %s' %f.name)
