@@ -5812,6 +5812,7 @@ class RatingScale:
                 low=1,
                 high=7,
                 lowAnchorText=None,
+                midAnchorText='',
                 highAnchorText=None,
                 tickMarks=None,
                 labels=None,
@@ -5843,6 +5844,7 @@ class RatingScale:
                 displaySizeFactor=1.0,
                 stretchHoriz=1.0,
                 pos=None,
+                anchorVertOffset=-2,
                 minTime=1.0,
                 maxTime=0.0,
                 disappear=False,
@@ -5871,6 +5873,8 @@ class RatingScale:
             text to dsiplay for the low end of the scale (default = numeric low value)
         highAnchorText :
             text to display for the high end of the scale (default = numeric high value)
+        midAnchorText :
+            text to display for the middle of the scale (default = '')
         tickMarks :
             list of positions at which tick marks should be placed
             (low and high need to be included if tick marks should be at the edges of the scale).
@@ -5882,7 +5886,7 @@ class RatingScale:
             If `None` and `choices`:  choices will be plotted at ticks and
             `showAnchors=False`, but `scale` can be used for plotting above the line.
             If `None` and  `tickMarks`: `tickMarks` will be used and `showAnchors=False`.
-            If False, no labels are plotted at ticj marks (i.e., restores old behavior of `choices`).
+            If False, no labels are plotted at tick marks (i.e., restores old behavior of `choices`).
         precision :
             portions of a tick to accept as input [1, 10, 100], default = 1 tick (no fractional parts)
 
@@ -5965,6 +5969,9 @@ class RatingScale:
         pos : tuple (x, y)
             where to position the rating scale (x, y) in terms of the window's units (pix, norm);
             default (0.0, -0.4) in norm units
+        anchorVertOffset:
+            where should should the anchor be displayed above (pos) or below (neg) the rating line?
+            default = -2 (in norm units)
         displaySizeFactor :
             how much to expand or contract the overall rating scale display
             (not just the line length)
@@ -6006,8 +6013,8 @@ class RatingScale:
         # Generally make things well-behaved if the requested value(s) would be trouble:
         self._initFirst(showAccept, mouseOnly, singleClick, acceptKeys,
                         markerStart, low, high, precision, choices,
-                        lowAnchorText, highAnchorText, scale, showScale, showAnchors,
-                        tickMarks, labels, ticksAboveLine)
+                        lowAnchorText, midAnchorText, highAnchorText, scale, showScale, showAnchors, 
+                        tickMarks, labels, ticksAboveLine, anchorVertOffset)
         self._initMisc(minTime, maxTime)
 
         # Set scale & position, key-bindings:
@@ -6017,15 +6024,16 @@ class RatingScale:
         # Construct the visual elements:
         self._initLine(lineColor=lineColor, tickMarks = tickMarks)
         self._initMarker(customMarker, markerExpansion, markerColor, markerStyle, self.tickSize)
-        self._initTextElements(win, self.lowAnchorText, self.highAnchorText, self.scale,
+        self._initTextElements(win, self.lowAnchorText, self.midAnchorText, self.highAnchorText, self.scale,
                             textColor, textFont, textSizeFactor, showValue, tickMarks)
         self._initAcceptBox(self.showAccept, acceptPreText, acceptText, self.markerColor,
                             self.textSizeSmall, textSizeFactor, self.textFont)
 
         # List-ify the requested visual elements; self.marker is handled separately
+        # self.showAnchors = True
         self.visualDisplayElements = []
         if self.showScale:   self.visualDisplayElements += [self.scaleDescription]
-        if self.showAnchors: self.visualDisplayElements += [self.lowAnchor, self.highAnchor]
+        if showAnchors: self.visualDisplayElements += [self.lowAnchor, self.midAnchor, self.highAnchor]
         if self.showAccept:  self.visualDisplayElements += [self.acceptBox, self.accept]
         if self.labelTexts:
             for text in self.labels:
@@ -6039,8 +6047,8 @@ class RatingScale:
 
     def _initFirst(self, showAccept, mouseOnly, singleClick, acceptKeys,
                    markerStart, low, high, precision, choices,
-                   lowAnchorText, highAnchorText, scale, showScale, showAnchors,
-                   tickMarks, labels, ticksAboveLine):
+                   lowAnchorText, midAnchorText, highAnchorText, scale, showScale, showAnchors, 
+                   tickMarks, labels, ticksAboveLine, anchorVertOffset):
         """some sanity checking; various things are set, especially those that are
         used later; choices, anchors, markerStart settings are handled here
         """
@@ -6050,6 +6058,7 @@ class RatingScale:
         self.acceptKeys = acceptKeys
         self.precision = precision
         self.showAnchors = bool(showAnchors)
+        self.anchorVertOffset = anchorVertOffset
         self.labelTexts = None
         self.ticksAboveLine = ticksAboveLine
 
@@ -6067,6 +6076,7 @@ class RatingScale:
         self.scale = scale
         self.showScale = showScale
         self.lowAnchorText = lowAnchorText
+        self.midAnchorText = midAnchorText
         self.highAnchorText = highAnchorText
         if choices and len(list(choices)) < 2:
             logging.warning("RatingScale %s: ignoring choices=[ ]; it requires 2 or more list elements" % self.name)
@@ -6079,6 +6089,7 @@ class RatingScale:
                     self.showAnchors = False
                 else:
                     self.lowAnchorText = unicode(lowAnchorText)
+                    self.midAnchorText = unicode(midAnchorText)
                     self.highAnchorText = unicode(highAnchorText)
                 self.scale = '  '.join(map(unicode, choices)) # unicode for display
                 self.choices = choices
@@ -6438,7 +6449,7 @@ class RatingScale:
             self.markerBaseSize = tickSize
         self.markerColor = markerColor
 
-    def _initTextElements(self, win, lowAnchorText, highAnchorText, scale, textColor,
+    def _initTextElements(self, win, lowAnchorText, midAnchorText, highAnchorText, scale, textColor,
                           textFont, textSizeFactor, showValue, tickMarks):
         """creates TextStim for self.scaleDescription, self.lowAnchor, self.highAnchor
         """
@@ -6457,11 +6468,16 @@ class RatingScale:
             lowText = unicode(lowAnchorText)
         else:
             lowText = unicode(self.low)
+        if midAnchorText:
+            midText = unicode(midAnchorText)
+        else:
+            midText = unicode(self.midAnchorText)
         if highAnchorText:
             highText = unicode(highAnchorText)
         else:
             highText = unicode(self.high)
         self.lowAnchorText = lowText
+        self.midAnchotText = midText
         self.highAnchorText = highText
         if not scale:
             scale = ' '
@@ -6477,17 +6493,24 @@ class RatingScale:
         self.scaleDescription.setFont(textFont)
         self.lowAnchor = TextStim(win=self.win,
             pos=[self.offsetHoriz - 0.5 * self.stretchHoriz * self.displaySizeFactor,
-                 -2 * self.textSizeSmall * self.displaySizeFactor + self.offsetVert],
-            height=self.textSizeSmall,
-            color=self.textColor, colorSpace=self.textColorSpace,
+            self.anchorVertOffset * self.textSizeSmall * self.displaySizeFactor + self.offsetVert],
+            height=self.textSizeSmall, color=self.textColor, colorSpace=self.textColorSpace,
             name=self.name+'.lowAnchor')
         self.lowAnchor.setFont(textFont)
         self.lowAnchor.setText(lowText)
+
+        self.midAnchor = TextStim(win=self.win,
+                            pos=[self.offsetHoriz + 0.0 * self.stretchHoriz * self.displaySizeFactor,
+                            self.anchorVertOffset * self.textSizeSmall * self.displaySizeFactor + self.offsetVert],
+                            height=self.textSizeSmall, color=self.textColor, colorSpace=self.textColorSpace,
+                            name=self.name+'.midAnchor')
+        self.midAnchor.setFont(textFont)
+        self.midAnchor.setText(midText)
+
         self.highAnchor = TextStim(win=self.win,
             pos=[self.offsetHoriz + 0.5 * self.stretchHoriz * self.displaySizeFactor,
-                 -2 * self.textSizeSmall * self.displaySizeFactor + self.offsetVert],
-            height=self.textSizeSmall,
-            color=self.textColor, colorSpace=self.textColorSpace,
+            self.anchorVertOffset * self.textSizeSmall * self.displaySizeFactor + self.offsetVert],
+            height=self.textSizeSmall, color=self.textColor, colorSpace=self.textColorSpace,
             name=self.name+'.highAnchor')
         self.highAnchor.setFont(textFont)
         self.highAnchor.setText(highText)
