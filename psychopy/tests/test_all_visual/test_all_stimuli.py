@@ -237,6 +237,18 @@ class _baseVisualTest:
         rs.draw()
         utils.compareScreenshot('ratingscale1_%s.png' %(self.contextName), win, crit=30.0)
         win.flip()#AFTER compare screenshot
+    def test_rating_scale_set_category_choices(self):
+        win = self.win
+        win.flip()
+        rs = visual.RatingScale(win, choices=['north', 'south'], displaySizeFactor=2, pos=(0,-.4),
+                        scale=' ',
+                        markerStyle='glow', markerStart=0.7, markerColor='darkBlue')
+
+        rs.setCategoryChoices(['west', 'east'])
+        rs.draw()
+        utils.compareScreenshot('ratingscale1_choices_%s.png' %(self.contextName), win, crit=1.0)
+        win.flip()
+        
     def test_refresh_rate(self):
         if self.win.winType=='pygame':
             pytest.skip("getMsPerFrame seems to crash the testing of pygame")

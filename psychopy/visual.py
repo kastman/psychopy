@@ -6536,7 +6536,16 @@ class RatingScale:
         else:
             logging.exp('RatingScale %s: no scale description; low=%s, high=%s' %
                         (self.name, self.lowAnchor.text, self.highAnchor.text))
-
+    def setCategoryChoices(self, choices):
+        """Updates the text of labels"""
+        self.labelTexts = choices
+        self.choices = choices
+        if len(self.labels) != len(choices):
+            raise ArgumentError("Choices must be the same length as your initialized choices.")
+        for label, choice in zip(self.labels, choices):
+            label.setText(choice)
+        # pass
+    
     def _initAcceptBox(self, showAccept, acceptPreText, acceptText,
                        markerColor, textSizeSmall, textSizeFactor, textFont):
         """creates a ShapeStim for self.acceptBox (mouse-click-able 'accept'  button)
