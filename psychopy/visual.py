@@ -6477,7 +6477,7 @@ class RatingScale:
         else:
             highText = unicode(self.high)
         self.lowAnchorText = lowText
-        self.midAnchotText = midText
+        self.midAnchorText = midText
         self.highAnchorText = highText
         if not scale:
             scale = ' '
